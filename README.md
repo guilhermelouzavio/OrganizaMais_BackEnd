@@ -75,22 +75,3 @@ This API is structured around **Clean Architecture** principles, aiming for a st
         * Uses `SimpleBank.Infrastructure/Repositories` (Dapper) to query `PostgreSQL`.
     5.  The data is mapped to a `DTO` and returned through the pipeline back to the Controller.
     6.  The Controller returns an appropriate HTTP response.
-
-## Getting Started
-
-Follow these steps to get the project up and running on your local machine.
-
-### Prerequisites
-
-* [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (or higher)
-* [PostgreSQL](https://www.postgresql.org/download/) (Local installation or access to a cloud instance)
-* [Git](https://git-scm.com/downloads) (Optional, for cloning the repository)
-* An IDE like [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), [Rider](https://www.jetbrains.com/rider/), or [VS Code](https://code.visualstudio.com/) (with C# Dev Kit extension)
-
-### 1. Clone the Repository (if applicable)
-
-If your project is in a Git repository, clone it:
-
-```bash
-git clone <repository_url>
-cd simple-financial-control-api # or whatever your project's root folder is

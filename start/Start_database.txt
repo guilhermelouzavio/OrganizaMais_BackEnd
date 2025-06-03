@@ -1,0 +1,39 @@
+-- Create Users Table
+CREATE TABLE Users (
+    Id SERIAL PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    PasswordHash TEXT NOT NULL,
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create FinancialAccounts Table
+CREATE TABLE FinancialAccounts (
+    Id SERIAL PRIMARY KEY,
+    UserId INT NOT NULL REFERENCES Users(Id) ON DELETE CASCADE,
+    Name VARCHAR(100) NOT NULL,
+    Balance DECIMAL(18, 2) NOT NULL DEFAULT 0.00,
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Categories Table
+CREATE TABLE Categories (
+    Id SERIAL PRIMARY KEY,
+    UserId INT NULL REFERENCES Users(Id) ON DELETE CASCADE, -- NULL for standard categories
+    Name VARCHAR(100) NOT NULL,
+    Type VARCHAR(50) NOT NULL, -- To store 'Income' or 'Expense' (enum as text)
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Transactions Table
+CREATE TABLE Transactions (
+    Id SERIAL PRIMARY KEY,
+    UserId INT NOT NULL REFERENCES Users(Id) ON DELETE CASCADE,
+    FinancialAccountId INT NOT NULL REFERENCES FinancialAccounts(Id) ON DELETE CASCADE,
+    CategoryId INT NOT NULL REFERENCES Categories(Id) ON DELETE RESTRICT, -- RESTRICT to prevent deleting category if used
+    Description VARCHAR(500) NULL,
+    Value DECIMAL(18, 2) NOT NULL,
+    Type VARCHAR(50) NOT NULL, -- To store 'Income' or 'Expense' (enum as text)
+    TransactionDate DATE NOT NULL,
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

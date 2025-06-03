@@ -11,7 +11,7 @@ namespace SimpleBank.Domain.Interfaces.Repositories
     {
         Task<User?> GetByIdAsync(int id);
         Task<User?> GetByEmailAsync(string email);
-        Task AddAsync(User user);
+        Task<long> AddAsync(User user);
         void Update(User user); // Não é assíncrono porque não acessa o banco diretamente, só marca para update
         void Delete(User user);
         Task<IEnumerable<User>> GetAllAsync();

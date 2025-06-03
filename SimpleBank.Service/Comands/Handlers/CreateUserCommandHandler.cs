@@ -49,20 +49,24 @@ namespace SimpleBank.Application.Comands.Handlers
             var user = new User(request.Name, request.Email, request.Password);
 
             // 5. Adicionar ao repositório
-            await _unitOfWork.Users.AddAsync(user);
+            var userIdCreated = await _unitOfWork.Users.AddAsync(user);
 
             // 6. Persistir as mudanças (com Dapper, geralmente cada operação já é salva,
             // mas o UoW mantém a abstração e seria usado para transações complexas).
-            await _unitOfWork.CompleteAsync();
+            //await _unitOfWork.CompleteAsync();
 
-            // 7. Retornar um DTO
-            return new UserDTO
+            if (userIdCreated != 0)
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
+                return new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt
+                };
+            }
+            else
+                return null;
         }
     }
 }
