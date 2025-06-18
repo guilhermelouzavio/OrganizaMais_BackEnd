@@ -1,4 +1,3 @@
-using SimpleBank.Application.Comands; // Para pegar o assembly do MediatR
 using SimpleBank.Application.Behaviors; // Para o ValidationBehavior
 using SimpleBank.Application.Interfaces; // Para as estratégias
 using SimpleBank.Application.Strategies; // Para as implementações das estratégias
@@ -9,14 +8,15 @@ using FluentValidation; // Para o FluentValidation
 using MediatR; // Se precisar de alguma configuração direta, mas o Extensions já ajuda
 using Microsoft.OpenApi.Models; // Para o Swagger Security (já deve estar lá)
 using System.Reflection;
-using SimpleBank.Infra.Repositories; // Para pegar o assembly do FluentValidation
+using SimpleBank.Infra.Repositories;
+using SimpleBank.Application.Comands.Users; // Para pegar o assembly do FluentValidation
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Adicionar services ao contêiner.
 
 // 1. Configurar o MediatR
-// Ele vai escanear o assembly onde está o "CreateUserCommand" (ControleFinanceiro.Application)
+// Ele vai escanear o assembly onde está o "CreateUserCommand" (SimpleBank.Application)
 // e registrar todos os IRequest e IRequestHandler que encontrar.
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateUserCommand).Assembly));
 

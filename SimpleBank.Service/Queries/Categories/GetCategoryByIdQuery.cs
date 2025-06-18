@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Queries
+namespace SimpleBank.Application.Queries.Categories
 {
-    public class GetUserByIdQuery : IRequest<UserDTO?> // Retorna um UserDTO ou nulo
+    public class GetCategoryByIdQuery : IRequest<CategoryDTO?>
     {
         public int Id { get; set; }
+        public int? UserId { get; set; } // Para considerar categorias padrão ou do usuário
     }
 }

@@ -2,10 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using SimpleBank.Domain.Entities;
+using SimpleBank.Domain.Enums;
 using SimpleBank.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,6 +87,69 @@ namespace SimpleBank.Infra.Repositories
                 Type = transaction.Type.ToString(), // Converte enum para string
                 transaction.TransactionDate
             });
+        }
+
+        public async Task<IEnumerable<Transaction>> GetByFinancialAccountIdAsync(int financialAccountId, TransactionType? type = null, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var sql = "SELECT * FROM Transactions WHERE FinancialAccountId = @FinancialAccountId";
+            var parameters = new DynamicParameters();
+            parameters.Add("FinancialAccountId", financialAccountId);
+
+            if (type.HasValue)
+            {
+                sql += " AND Type = @Type";
+                parameters.Add("Type", type.Value.ToString());
+            }
+            if (startDate.HasValue)
+            {
+                sql += " AND TransactionDate >= @StartDate";
+                parameters.Add("StartDate", startDate.Value);
+            }
+            if (endDate.HasValue)
+            {
+                sql += " AND TransactionDate <= @EndDate";
+                parameters.Add("EndDate", endDate.Value);
+            }
+            sql += " ORDER BY TransactionDate DESC"; // Ou como preferir
+
+            using var db = Connection;
+            return await db.QueryAsync<Transaction>(sql, parameters);
+        }
+
+        public async Task<IEnumerable<(Transaction transaction, string categoryName)>> GetTransactionsForReportAsync(int userId, DateTime startDate, DateTime endDate, TransactionType? type = null)
+        {
+            var sql = @"
+                SELECT
+                    t.Id, t.UserId, t.FinancialAccountId, t.CategoryId, t.Description,
+                    t.Value, t.Type, t.TransactionDate, t.CreatedAt,
+                    c.Name as CategoryName -- Alias para o nome da categoria
+                FROM Transactions t
+                JOIN Categories c ON t.CategoryId = c.Id
+                WHERE t.UserId = @UserId
+                  AND t.TransactionDate BETWEEN @StartDate AND @EndDate";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("UserId", userId);
+            parameters.Add("StartDate", startDate.Date); // Usar .Date para ignorar a hora
+            parameters.Add("EndDate", endDate.Date); // Usar .Date para ignorar a hora
+
+            if (type.HasValue)
+            {
+                sql += " AND t.Type = @Type";
+                parameters.Add("Type", type.Value.ToString());
+            }
+
+            // Dapper pode mapear para múltiplos objetos ou para um tipo anônimo/tupla
+            // O mapeamento funciona se as colunas forem nomeadas corretamente no SQL e no mapeamento
+            // Neste caso, 'splitOn: "CategoryName"' indica onde o Dapper deve "dividir" o mapeamento
+            // para o próximo tipo na tupla.
+            using var db = Connection;
+            return await db.QueryAsync<Transaction, string, (Transaction transaction, string categoryName)>(
+                sql,
+                (transaction, categoryName) => (transaction, categoryName), // Mapeia para a tupla
+                parameters,
+                splitOn: "CategoryName" // Coluna onde começa o mapeamento do segundo tipo (string)
+            );
         }
     }
 }

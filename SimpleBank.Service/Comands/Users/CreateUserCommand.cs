@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Comands
+namespace SimpleBank.Application.Comands.Users
 {
     public class CreateUserCommand : IRequest<UserDTO>
     {

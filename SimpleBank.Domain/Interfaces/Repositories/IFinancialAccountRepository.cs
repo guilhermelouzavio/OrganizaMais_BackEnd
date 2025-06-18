@@ -11,7 +11,7 @@ namespace SimpleBank.Domain.Interfaces.Repositories
     {
         Task<FinancialAccount?> GetByIdAsync(int id);
         Task<IEnumerable<FinancialAccount>> GetByUserIdAsync(int userId);
-        Task AddAsync(FinancialAccount account);
+        Task<long> AddAsync(FinancialAccount account);
         void Update(FinancialAccount account);
         void Delete(FinancialAccount account);
     }

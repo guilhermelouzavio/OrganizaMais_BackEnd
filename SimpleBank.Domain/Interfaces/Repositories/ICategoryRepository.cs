@@ -15,5 +15,9 @@ namespace SimpleBank.Domain.Interfaces.Repositories
         Task AddAsync(Category category);
         void Update(Category category);
         void Delete(Category category);
+        Task<IEnumerable<Category>> GetByUserIdOrStandardAsync(int userId); // Retorna categorias do user ou as padrão (UserId = null)
+                                                                     // Se quiser pegar só as padrão:
+        Task<IEnumerable<Category>> GetStandardCategoriesAsync();
+
     }
 }

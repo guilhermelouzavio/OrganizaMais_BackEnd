@@ -1,13 +1,14 @@
 ﻿using MediatR;
+using SimpleBank.Application.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Comands
+namespace SimpleBank.Application.Queries.Users
 {
-    public class DeleteUserCommand : IRequest<Unit> // Unit indica que não retorna nada, apenas sucesso/falha
+    public class GetUserByIdQuery : IRequest<UserDTO?> // Retorna um UserDTO ou nulo
     {
         public int Id { get; set; }
     }

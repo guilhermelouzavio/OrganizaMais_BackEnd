@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SimpleBank.Application.Dtos;
+using SimpleBank.Application.Queries.Users;
 using SimpleBank.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Queries.Handlers
+namespace SimpleBank.Application.Queries.Handlers.Users
 {
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDTO?>
     {

@@ -12,6 +12,7 @@ namespace SimpleBank.Application.Dtos
         public int Id { get; set; }
         public int? UserId { get; set; } // Pode ser nulo para categorias padrão
         public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public TransactionType Type { get; set; }
     }
 }

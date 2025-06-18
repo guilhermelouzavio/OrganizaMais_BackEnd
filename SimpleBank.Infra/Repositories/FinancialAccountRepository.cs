@@ -21,11 +21,11 @@ namespace SimpleBank.Infra.Repositories
 
         private IDbConnection Connection => new NpgsqlConnection(_connectionString);
 
-        public async Task AddAsync(FinancialAccount account)
+        public async Task<long> AddAsync(FinancialAccount account)
         {
             var sql = "INSERT INTO FinancialAccounts (UserId, Name, Balance, CreatedAt) VALUES (@UserId, @Name, @Balance, @CreatedAt) RETURNING Id";
             using var db = Connection;
-            account.Id = await db.ExecuteScalarAsync<int>(sql, account);
+            return await db.ExecuteScalarAsync<int>(sql, account);
         }
 
         public void Delete(FinancialAccount account)

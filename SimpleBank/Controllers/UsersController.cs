@@ -1,11 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SimpleBank.Application.Comands;
 using SimpleBank.Application.Dtos;
 using SimpleBank.Application.Queries;
 using System.Net;
 using FluentValidation; // Para capturar a ValidationException
-using System.Net; // Para HttpStatusCode
+using System.Net;
+using SimpleBank.Application.Comands.Users;
+using SimpleBank.Application.Queries.Users; // Para HttpStatusCode
 
 namespace SimpleBank.Controllers
 {

@@ -37,3 +37,12 @@ CREATE TABLE Transactions (
     TransactionDate DATE NOT NULL,
     CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- SQL para adicionar a coluna Description na tabela Categories
+ALTER TABLE "categories"
+ADD COLUMN "description" VARCHAR(255) NULL;
+
+-- Opcional: Se você quiser garantir que a descrição seja vazia por padrão ao invés de NULL
+ALTER TABLE "categories"
+ALTER COLUMN "description" SET DEFAULT '';
+UPDATE "categories" SET "description" = '' WHERE "description" IS NULL;

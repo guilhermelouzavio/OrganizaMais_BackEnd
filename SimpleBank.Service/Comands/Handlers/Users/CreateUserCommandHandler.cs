@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SimpleBank.Application.Comands.Users;
 using SimpleBank.Application.Dtos;
 using SimpleBank.Domain.Entities;
 using SimpleBank.Domain.Interfaces;
@@ -9,7 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Comands.Handlers
+namespace SimpleBank.Application.Comands.Handlers.Users
 {
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDTO>
     {

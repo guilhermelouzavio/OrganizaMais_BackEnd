@@ -32,8 +32,6 @@ namespace SimpleBank.Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        private FinancialAccount() { } // Construtor para o EF Core
-
         // Métodos de comportamento para o domínio
         public void Deposit(decimal amount)
         {

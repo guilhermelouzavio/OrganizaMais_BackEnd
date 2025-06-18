@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleBank.Application.Queries
+namespace SimpleBank.Application.Queries.Users
 {
     public class GetAllUsersQuery : IRequest<IEnumerable<UserDTO>> // Retorna uma coleção de UserDTOs
     {
