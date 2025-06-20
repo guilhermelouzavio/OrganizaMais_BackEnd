@@ -10,6 +10,10 @@ using Microsoft.OpenApi.Models; // Para o Swagger Security (já deve estar lá)
 using System.Reflection;
 using SimpleBank.Infra.Repositories;
 using SimpleBank.Application.Comands.Users; // Para pegar o assembly do FluentValidation
+using SimpleBank.Infra.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,18 +46,35 @@ builder.Services.AddTransient<ITransactionRepository, TransactionRepository>();
 // Registra todas as implementações de ITransactionFeeStrategy
 builder.Services.AddTransient<ITransactionFeeStrategy, CreditCardFeeStrategy>();
 builder.Services.AddTransient<ITransactionFeeStrategy, PixFeeStrategy>();
-// Adicione outras estratégias aqui conforme for criando
 
-// 6. Configurar a string de conexão do PostgreSQL
-// Adicione esta linha (ou verifique se ela já existe) para carregar a string de conexão
-// do appsettings.json.
-// Exemplo de appsettings.json:
-// {
-//   "ConnectionStrings": {
-//     "DefaultConnection": "Host=localhost;Port=5432;Database=controlefinanceiro;Username=sua_user;Password=sua_senha"
-//   }
-// }
-// Para um banco na nuvem (Render, Supabase, etc.), a string de conexão será bem maior.
+// --- Configuração do Serviço de Token (JWT) ---
+builder.Services.AddTransient<ITokenService, TokenService>();
+
+// --- Configuração da Autenticação JWT ---
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false; // Mudar para true em produção
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!)),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateLifetime = true, // Valida se o token expirou
+        ClockSkew = TimeSpan.Zero // Não permite "desvio" de tempo na expiração
+    };
+});
+
+builder.Services.AddAuthorization(); // Habilita o uso de [Authorize]
+
 builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection")
                                      ?? throw new InvalidOperationException("DefaultConnection string not found."));
 
@@ -100,6 +121,11 @@ builder.Services.AddSwaggerGen(opts =>
 
 
 var app = builder.Build();
+
+
+// --- Adicionar Middleware de Autenticação e Autorização ---
+app.UseAuthentication(); // DEVE VIR ANTES DE UseAuthorization()
+app.UseAuthorization();
 
 // Configurar o pipeline de requisição HTTP.
 if (app.Environment.IsDevelopment())

@@ -3,60 +3,46 @@ using SimpleBank.Application.Comands.Users;
 using SimpleBank.Application.Dtos;
 using SimpleBank.Domain.Entities;
 using SimpleBank.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using BCrypt.Net; // Adicione este using!
 
-namespace SimpleBank.Application.Comands.Handlers.Users
+namespace SimpleBank.Application.Comands.Handlers.Users;
+
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDTO>
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDTO>
-    {
-        private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
-        public CreateUserCommandHandler(IUnitOfWork unitOfWork)
+    public CreateUserCommandHandler(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<UserDTO> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    {
+        // Verificação se o e-mail já existe (Boa prática, pode ir para validador)
+        var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
+        if (existingUser != null)
         {
-            _unitOfWork = unitOfWork;
+            throw new InvalidOperationException("E-mail já cadastrado.");
         }
 
-        public async Task<UserDTO> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        // 1. Gerar o hash da senha usando BCrypt
+        // BCrypt.HashPassword gera um salt aleatório e o incorpora no hash
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+        // 2. Criar a entidade User com o hash da senha
+        // Assumindo que sua entidade User tem uma propriedade para o hash (ex: PasswordHash)
+        var user = new User(
+            request.Name,
+            request.Email,
+            passwordHash // Salva o HASH, não a senha em texto puro!
+        );
+
+        try
         {
-            // 1. Lógica de Validação (poderia estar em um Behavior ou Validador separado)
-            if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            {
-                throw new ArgumentException("Name, Email, and Password cannot be empty.");
-            }
+            var idCreated = await _unitOfWork.Users.AddAsync(user);
+            await _unitOfWork.CompleteAsync(); // Salva no banco de dados
 
-            // 2. Hash da Senha (IMPORTANTE: Use uma biblioteca mais robusta como BCrypt.Net em produção!)
-            // Este é APENAS UM EXEMPLO SIMPLES E INSEGURO para hash.
-            // Para produção, instale o pacote BCrypt.Net.Core e use:
-            // string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
-                request.Password = BitConverter.ToString(hashedBytes).Replace("-", "").ToLowerInvariant();
-            }
-
-            // 3. Verificar se o e-mail já existe (usando repositório e talvez uma Specification)
-            var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
-            if (existingUser != null)
-            {
-                throw new InvalidOperationException($"User with email '{request.Email}' already exists.");
-            }
-
-            // 4. Criar a entidade de domínio
-            var user = new User(request.Name, request.Email, request.Password);
-
-            // 5. Adicionar ao repositório
-            var userIdCreated = await _unitOfWork.Users.AddAsync(user);
-
-            // 6. Persistir as mudanças (com Dapper, geralmente cada operação já é salva,
-            // mas o UoW mantém a abstração e seria usado para transações complexas).
-            //await _unitOfWork.CompleteAsync();
-
-            if (userIdCreated != 0)
+            if (idCreated != 0)
             {
                 return new UserDTO
                 {
@@ -67,7 +53,11 @@ namespace SimpleBank.Application.Comands.Handlers.Users
                 };
             }
             else
-                return null;
+                throw new InvalidOperationException("Houve um problema ao criar a conta.");
+        }
+        catch (Exception)
+        {
+            throw new InvalidOperationException("E-mail já cadastrado.");
         }
     }
 }

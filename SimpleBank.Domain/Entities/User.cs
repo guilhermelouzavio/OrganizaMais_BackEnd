@@ -36,19 +36,29 @@ namespace SimpleBank.Domain.Entities
         // Isso impede que o EF Core ou outras ferramentas tentem usar o construtor público para hidratação
         private User() { }
 
-        // Métodos de comportamento (se houver, por exemplo, para atualizar dados do usuário)
-        public void UpdateName(string newName)
+        // Método para atualizar informações do usuário (excluindo senha)
+        public void Update(string name, string email)
         {
-            if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("New name cannot be null or empty.", nameof(newName));
-            Name = newName;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Nome do usuário não pode ser vazio.", nameof(name));
+            }
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentException("Email do usuário não pode ser vazio.", nameof(email));
+            }
+            Name = name;
+            Email = email;
         }
 
-        public void UpdateEmail(string newEmail)
+        // Método para atualizar a senha (opcional, se fizer um comando de "Alterar Senha")
+        public void SetPasswordHash(string newPasswordHash)
         {
-            if (string.IsNullOrWhiteSpace(newEmail))
-                throw new ArgumentException("New email cannot be null or empty.", nameof(newEmail));
-            Email = newEmail;
+            if (string.IsNullOrWhiteSpace(newPasswordHash))
+            {
+                throw new ArgumentException("Hash da senha não pode ser vazio.", nameof(newPasswordHash));
+            }
+            PasswordHash = newPasswordHash;
         }
 
         // No DDD, as coleções de navegação geralmente não são expostas publicamente para escrita direta.
